@@ -1,0 +1,130 @@
+window.onload = function() {
+  canvas = document.getElementById("Halo");
+  pen = canvas.getContext("2d");
+  document.addEventListener("keydown", keyPush);
+  setInterval(game, 1000/10);
+}
+// these are global variables, var would be needed if they weren't
+player_x = 10;
+player_y = 10;
+
+gridSize = 20;
+tileCount = 20;
+
+x_speed = 0;
+y_speed = 0;
+
+lives = 3;
+
+grunt_x = 15;
+grunt_y = 15;
+
+trail=[]
+
+tail = 5;
+lives = 1;
+score = 0;
+
+//all game logic
+function game(){
+  
+  player_x += x_speed;
+  player_y += y_speed;
+  
+  if(player_x < 0) {
+    player_x = tileCount - 1;
+    lives -= 1;
+    score -= score;
+  }
+  if(player_x > tileCount - 1) {
+    player_x = 0;
+    lives -= 1;
+    score -= score;
+  }
+  
+  if(player_y < 0) {
+    player_y = tileCount - 1;
+    lives -= 1;
+    score -= score;
+  }
+  if(player_y > tileCount - 1) {
+    player_y = 0;
+    lives -= 1;
+    score -= score;
+  }
+  for (i=1; i<4; i++){
+    pen.fillText(i.toString(),0,0);
+  }
+  pen.fillStyle = "black";
+  pen.fillRect(0,0, canvas.width, canvas.height);
+  pen.fillStyle = "blue";
+  
+  for(var  i=0; i<trail.length; i++) {
+    pen.fillRect(trail[i].x*gridSize, trail[i].y*gridSize, gridSize, gridSize)
+    if(trail[i].x==player_x && trail[i].y==player_y){
+      tail = 5;
+      lives - 1;
+    }
+    if(grunt_x == player_x && grunt_y == player_y) {
+      tail++;
+      score++;
+      grunt_x = Math.floor(Math.random()*tileCount);
+      grunt_y = Math.floor(Math.random()*tileCount);
+    }
+    pen.fillStyle="grey";
+    pen.fillRect(grunt_x*gridSize,grunt_y*gridSize,gridSize,gridSize);
+  }
+  
+  trail.push({x:player_x,y:player_y});
+  while(trail.length>tail){
+    trail.shift();
+  }
+  
+pen.fillStyle = 'lightblue';
+pen.font = "Bold 20px Courier New"
+pen.fillText("Health: "+ lives, 10, 20)
+pen.fillText("Score: "+ score, 10, 40)
+  
+  
+if (lives <= 0) {
+  pen.fillStyle = "Black";
+  pen.fillRect(0,0, canvas.width, canvas.height);
+  pen.fillStyle = "lightblue";
+  pen.fillText("You Lose, Good day sir", 75, 200);
+  pen.fillText("Score: " + score, 75, 230)
+  clearInterval(update);
+}
+
+
+  
+  pen.fillStyle = "lightblue";
+  pen.fillRect(grunt_x*gridSize, grunt_y*gridSize, gridSize, gridSize);
+}
+function keyPush(evt) {
+  switch(evt.keyCode) {
+    case 37: // left arrow
+      if(x_speed !== 1){
+        x_speed = -1;
+        y_speed = 0;
+      }
+      break;
+    case 38: // up arrow
+     if(y_speed !== 1){
+        x_speed = 0;
+        y_speed = -1;
+      }
+      break;
+    case 39: // right arrow
+    if(x_speed !== -1){
+      x_speed = 1;
+      y_speed = 0;
+      }
+      break;
+    case 40: // down arrow
+    if(y_speed !== -1){
+      x_speed = 0;
+      y_speed = 1;
+    }
+    break;
+  }
+}
