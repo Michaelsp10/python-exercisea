@@ -1,0 +1,130 @@
+
+window.onload = function(){
+  canvas = document.createElement("canvas");
+  canvas.width = 640;
+  canvas.height = 480;
+    
+  // adding the canvas to the HTML
+  document.body.appendChild(canvas);
+  pen = canvas.getContext("2d");
+    
+  // scan for keyboard inputs
+  document.addEventListener("keydown", keyPush);
+  document.addEventListener("mousemove", mouseMoveHandler, false);
+  //document.addEventListener("mousedown", mouseClickHandler, false);
+  
+
+  var fps = 30;
+  setInterval(update,1000/fps);
+  // enemy spawn rate
+  setInterval(spawn,2000);
+}
+
+// player stats
+player_x = 100;
+player_y = 100;
+
+player_speed = 15;
+player_dim = 25, 20;
+
+// enemy stats
+enemy_list = [];
+enemy_speed = 10;
+enemy_dim = 30, 25;
+
+// shot stats
+shot_list = [];
+shot_speed = 50;
+shot_dim = 10;
+
+lives = 3
+score = 0
+
+// enemy spawn points
+function spawn(){
+  enemy_list.push({x:canvas.width, y:Math.random()*canvas.height})
+}
+
+// update each frame
+function update() {
+  // background
+  pen.fillStyle = 'black';
+  pen.fillRect(0,0, canvas.width, canvas.height)
+    
+  // player
+  pen.fillStyle = 'grey';
+  pen.fillRect(player_x-player_dim/2, player_y-player_dim/2, player_dim, player_dim);
+    
+  // shots
+  pen.fillStyle = 'lime';
+  for (var s = 0; s < shot_list.length; s++) {
+    shot_list[s].x += shot_speed;
+    pen.fillRect(
+      shot_list[s].x - shot_dim / 2,
+      shot_list[s].y - shot_dim / 2,
+      shot_dim, shot_dim
+    );
+    for (var e = enemy_list.length - 1; e >= 0; e--) {
+      var diff_x = Math.abs(enemy_list[e].x - shot_list[s].x);
+      var diff_y = Math.abs(enemy_list[e].y - shot_list[s].y);
+      var dist = Math.sqrt(diff_x * diff_x + diff_y * diff_y);
+      if (dist < (shot_dim + enemy_dim) / 2) {
+        enemy_list.splice(e, 1);
+        score += 10;
+      }
+
+    }
+  }
+  // enemy
+  pen.fillStyle = 'darkred';
+  for (var e = 0; e < enemy_list.length; e++){
+    enemy_list[e].x -= enemy_speed;
+    pen.fillRect(
+      enemy_list[e].x - enemy_dim / 2,
+      enemy_list[e].y - enemy_dim / 2,
+      enemy_dim, enemy_dim);
+      var diff_x = Math.abs(enemy_list[e].x - player_x);
+      var diff_y = Math.abs(enemy_list[e].y - player_y);
+      var dist = Math.sqrt(diff_x * diff_x + diff_y * diff_y);
+
+    if (dist < (player_dim + enemy_dim) / 2) {
+      shot_list = [];
+      enemy_list = [];
+      player_x = player_y = 100;
+      lives --;
+      break;
+    }
+  }
+pen.fillStyle = 'green';
+pen.font = "Bold 20px Courier New"
+pen.fillText("Health: "+ lives, 10, 20)
+pen.fillText("Score: "+ score, 10, 40)
+pen.fillText("Press 'f' to fire", 425,20)
+
+if (lives <= 0) {
+  pen.fillStyle = "Black";
+  pen.fillRect(0,0, canvas.width, canvas.height);
+  pen.fillStyle = "green";
+  pen.fillText("You Lose, Good day sir", 200, 200);
+  pen.fillText("Score: " + score, 200, 230)
+  clearInterval(update);
+}
+
+function spawn() {
+  enemy_list.push({ x: canvas.width, y: Math.random() * canvas.height});
+  }
+}
+
+
+
+function keyPush(evt) {
+  switch(evt.keyCode){
+    case 70: // f key
+    shot_list.push({ x: player_x, y: player_y});
+      break;
+  } 
+}
+
+function mouseMoveHandler(e) {
+  player_y = e.clientY
+  }
